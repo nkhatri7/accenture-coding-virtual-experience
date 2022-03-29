@@ -20,32 +20,5 @@ import java.util.List;
  */
 @Repository
 public interface ProductItemRepository extends CrudRepository<ProductItem, Long> {
-    public default Collection<ProductItem> searchItems(String query) {
-        String lowerCaseQuery = query.toLowerCase();
-        Iterable<ProductItem> allItems = this.findAll();
-        List<ProductItem> itemList = new ArrayList<>();
 
-        // This is a loop that the code inside will execute on each of the items from the database.
-        for (ProductItem item : allItems) {
-            String itemName = item.getName().toLowerCase();
-            String itemDescription = item.getDescription().toLowerCase();
-
-            // Check if query uses quotes
-            if (query.startsWith("\"") && query.endsWith("\"")) {
-                // Remove quotes from query
-                String queryWithoutQuotes = lowerCaseQuery.substring(1,
-                        lowerCaseQuery.length() - 1);
-                if (itemName.equals(queryWithoutQuotes)
-                        || itemDescription.equals(queryWithoutQuotes)) {
-                    itemList.add(item);
-                }
-
-            } else if (itemName.contains(lowerCaseQuery)
-                    || itemDescription.contains(lowerCaseQuery)) {
-                itemList.add(item);
-            }
-        }
-
-        return itemList;
-    }
 }

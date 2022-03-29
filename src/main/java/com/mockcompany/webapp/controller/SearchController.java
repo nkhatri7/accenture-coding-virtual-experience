@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /* java.util package provides useful utilities */
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * This class is the entrypoint for the /api/products/search API.  It is "annotated" with
@@ -78,6 +80,30 @@ public class SearchController {
          *  For an added challenge, update the ProductItemRepository to do the filtering at the database layer :)
          */
 
-        return this.productItemRepository.searchItems(query);
+        String lowerCaseQuery = query.toLowerCase();
+        Iterable<ProductItem> allItems = this.productItemRepository.findAll();
+        List<ProductItem> itemList = new ArrayList<>();
+
+        // This is a loop that the code inside will execute on each of the items from the database.
+        for (ProductItem item : allItems) {
+            String itemName = item.getName().toLowerCase();
+            String itemDescription = item.getDescription().toLowerCase();
+
+            // Check if query uses quotes
+            if (query.startsWith("\"") && query.endsWith("\"")) {
+                // Remove quotes from query
+                String queryWithoutQuotes = lowerCaseQuery.substring(1,
+                        lowerCaseQuery.length() - 1);
+                if (itemName.equals(queryWithoutQuotes)
+                        || itemDescription.equals(queryWithoutQuotes)) {
+                    itemList.add(item);
+                }
+            } else if (itemName.contains(lowerCaseQuery)
+                    || itemDescription.contains(lowerCaseQuery)) {
+                itemList.add(item);
+            }
+        }
+
+        return itemList;
     }
 }
