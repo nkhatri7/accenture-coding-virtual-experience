@@ -80,26 +80,42 @@ public class SearchController {
          *  For an added challenge, update the ProductItemRepository to do the filtering at the database layer :)
          */
 
-        String lowerCaseQuery = query.toLowerCase();
         Iterable<ProductItem> allItems = this.productItemRepository.findAll();
         List<ProductItem> itemList = new ArrayList<>();
 
+        boolean exactMatch = false;
+        if (query.startsWith("\"") && query.endsWith("\"")) {
+            exactMatch = true;
+            // Remove quotes from query
+            query = query.substring(1, query.length() - 1);
+        } else {
+            // Handle case-insensitivity by converting to lowercase first
+            query = query.toLowerCase();
+        }
+
         // This is a loop that the code inside will execute on each of the items from the database.
         for (ProductItem item : allItems) {
-            String itemName = item.getName().toLowerCase();
-            String itemDescription = item.getDescription().toLowerCase();
+            boolean nameMatches;
+            boolean descMatches;
 
-            // Check if query uses quotes
-            if (query.startsWith("\"") && query.endsWith("\"")) {
-                // Remove quotes from query
-                String queryWithoutQuotes = lowerCaseQuery.substring(1,
-                        lowerCaseQuery.length() - 1);
-                if (itemName.equals(queryWithoutQuotes)
-                        || itemDescription.equals(queryWithoutQuotes)) {
-                    itemList.add(item);
-                }
-            } else if (itemName.contains(lowerCaseQuery)
-                    || itemDescription.contains(lowerCaseQuery)) {
+            // Check if we are doing exact match or not
+            if (exactMatch) {
+                // Check if name is an exact match
+                nameMatches = query.equals(item.getName());
+                // Check if description is an exact match
+                descMatches = query.equals(item.getDescription());
+            } else {
+                // Handle case-insensitivity by converting to lowercase
+                String name = item.getName().toLowerCase();
+                String description = item.getDescription().toLowerCase();
+                // Check if name contains query
+                nameMatches = name.contains(query);
+                // Check if description contains query
+                descMatches = description.contains(query);
+            }
+
+            // If either one matches, add to our list
+            if (nameMatches || descMatches) {
                 itemList.add(item);
             }
         }
