@@ -19,31 +19,43 @@ import java.util.*;
 @RestController
 public class ReportController {
 
-    @Autowired
+    // Inject service and repository
     SearchService searchService;
-
-    @Autowired
     ProductItemRepository productItemRepository;
+
+    // Update constructor to inject service and repository
+    @Autowired
+    public ReportController(SearchService searchService,
+                            ProductItemRepository productItemRepository) {
+        this.searchService = searchService;
+        this.productItemRepository = productItemRepository;
+    }
+
+    // Create array of key search terms to automate process
+    private static final String[] searchTerms = {
+            "Cool",
+            "Amazing",
+            "Perfect",
+            "Kids"
+    };
 
     @GetMapping("/api/products/report")
     public SearchReportResponse runReport() {
         Map<String, Integer> hits = new HashMap<>();
-        SearchReportResponse response = new SearchReportResponse();
-        response.setSearchTermHits(hits);
 
         // Get total number of products
         int count = (int) this.productItemRepository.count();
-        response.setProductCount(count);
-
-        // Create array of search terms to automate process
-        String[] searchTerms = {"Cool", "Amazing", "Perfect", "Kids"};
 
         for (String searchTerm: searchTerms) {
             // Create a list for each term and add it to the response with the size
             Collection<ProductItem> termList = this.searchService.search(searchTerm);
-            response.getSearchTermHits().put(searchTerm, termList.size());
+            hits.put(searchTerm, termList.size());
         }
 
+        // Transform to API response
+        SearchReportResponse response = new SearchReportResponse();
+        response.setProductCount(count);
+        response.setSearchTermHits(hits);
         return response;
     }
 }

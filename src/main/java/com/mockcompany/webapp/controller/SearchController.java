@@ -1,19 +1,5 @@
-/*
- * Java classes are grouped in "packages". This allows them to be referenced and used in other
- * classes using import statements.  Any class in this project is prefixed in the com.mockcompany.webapp
- * package.
- *
- *   https://www.w3schools.com/java/java_packages.asp
- *
- * For general help with Java, see the tutorialspoint tutorial:
- *
- *   https://www.tutorialspoint.com/java/index.htm
- */
 package com.mockcompany.webapp.controller;
 
-/*
- * An import statement allows the current class to use the class being imported
- */
 import com.mockcompany.webapp.data.ProductItemRepository;
 import com.mockcompany.webapp.model.ProductItem;
 /* The springframework package allows us to take advantage of the spring capabilities */
@@ -48,8 +34,15 @@ public class SearchController {
      * @Autowired annotation.  Autowired tells the spring framework to automatically find and use an instance of
      * the declared class when creating this class.
      */
-    @Autowired
+
+    // Inject service into class
     SearchService searchService;
+
+    // Update constructor to inject SearchService
+    @Autowired
+    public SearchController(SearchService searchService) {
+        this.searchService = searchService;
+    }
 
     /**
      * The search method, annotated with @GetMapping telling spring this method should be called
