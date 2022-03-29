@@ -72,11 +72,11 @@ class Body extends React.Component<BodyProps, BodyState> {
   }
 
   async componentDidMount() {
-    this.handleChangePage = this.handleChangePage.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
     this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
   }
 
-  handleChangePage(e: any, newPage: any) {
+  handlePageChange(e: any, newPage: any) {
     this.setState({ page: newPage });
   };
 
@@ -109,7 +109,7 @@ class Body extends React.Component<BodyProps, BodyState> {
                         ).map((product: any) => (
                             <TableRow key={product.id}>
                               <TableCell>{product.name}</TableCell>
-                              <TableCell><img src={product.image} alt={product.name} className={classes.image}></img></TableCell>
+                              <TableCell><img src={product.image} alt={product.name} className={classes.image} /></TableCell>
                               <TableCell>{product.description}</TableCell>
                               <TableCell component="th" scope="row">${product.cost / 100}</TableCell>
                             </TableRow>
@@ -118,14 +118,14 @@ class Body extends React.Component<BodyProps, BodyState> {
                 </Table>
             </TableContainer>
             <TablePagination
-            className={classes.pagination}
-            rowsPerPageOptions={[3, 5, 10]}
-            component="div"
-            count={products.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={this.handleChangePage}
-            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              className={classes.pagination}
+              rowsPerPageOptions={[3, 5, 10]}
+              component="div"
+              count={products.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={this.handlePageChange}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
             />
         </Paper>
       </div>

@@ -23,9 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /* java.util package provides useful utilities */
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * This class is the entrypoint for the /api/products/search API.  It is "annotated" with
@@ -44,7 +42,7 @@ public class SearchController {
 
     /**
      * This is a instance field.  It is provided by the spring framework through the constructor because of the
-     * @Autowired annotation.  Autowire tells the spring framework to automatically find and use an instance of
+     * @Autowired annotation.  Autowired tells the spring framework to automatically find and use an instance of
      * the declared class when creating this class.
      */
     private final ProductItemRepository productItemRepository;
@@ -80,15 +78,6 @@ public class SearchController {
          *  For an added challenge, update the ProductItemRepository to do the filtering at the database layer :)
          */
 
-        Iterable<ProductItem> allItems = this.productItemRepository.findAll();
-        List<ProductItem> itemList = new ArrayList<>();
-
-        // This is a loop that the code inside will execute on each of the items from the database.
-        for (ProductItem item : allItems) {
-            // TODO: Figure out if the item should be returned based on the query parameter!
-            boolean matchesSearch = true;
-            itemList.add(item);
-        }
-        return itemList;
+        return this.productItemRepository.searchItems(query);
     }
 }
