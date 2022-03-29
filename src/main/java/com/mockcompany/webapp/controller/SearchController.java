@@ -17,6 +17,7 @@ package com.mockcompany.webapp.controller;
 import com.mockcompany.webapp.data.ProductItemRepository;
 import com.mockcompany.webapp.model.ProductItem;
 /* The springframework package allows us to take advantage of the spring capabilities */
+import com.mockcompany.webapp.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,12 +48,8 @@ public class SearchController {
      * @Autowired annotation.  Autowired tells the spring framework to automatically find and use an instance of
      * the declared class when creating this class.
      */
-    private final ProductItemRepository productItemRepository;
-
     @Autowired
-    public SearchController(ProductItemRepository productItemRepository) {
-        this.productItemRepository = productItemRepository;
-    }
+    SearchService searchService;
 
     /**
      * The search method, annotated with @GetMapping telling spring this method should be called
@@ -64,62 +61,8 @@ public class SearchController {
      */
     @GetMapping("/api/products/search")
     public Collection<ProductItem> search(@RequestParam("query") String query) {
-        /*
-         * TODO: !!!! Implement this method !!!!
-         *  The easiest implementation will be to use the findAll as we are below. Then filter using Java
-         *  string methods such as contains(...), toLowerCase(...), equals(...), etc.
-         *
-         *  The requirements are defined in src/test/groovy/com/mockcompany/webapp/controller/SearchControllerSpec.groovy
-         *
-         *  Read through the tests to get an idea of how search should work.  When the tests are written before the code,
-         *  it is known as Test Driven Development (TDD) and is a common best practice. The Spock framework is a great
-         *  framework for TDD because the tests are written very descriptively using sentences.
-         *
-         *    https://spockframework.org/spock/docs/2.0/spock_primer.html
-         *
-         *  For an added challenge, update the ProductItemRepository to do the filtering at the database layer :)
-         */
 
-        Iterable<ProductItem> allItems = this.productItemRepository.findAll();
-        List<ProductItem> itemList = new ArrayList<>();
-
-        boolean exactMatch = false;
-        if (query.startsWith("\"") && query.endsWith("\"")) {
-            exactMatch = true;
-            // Remove quotes from query
-            query = query.substring(1, query.length() - 1);
-        } else {
-            // Handle case-insensitivity by converting to lowercase first
-            query = query.toLowerCase();
-        }
-
-        // This is a loop that the code inside will execute on each of the items from the database.
-        for (ProductItem item : allItems) {
-            boolean nameMatches;
-            boolean descMatches;
-
-            // Check if we are doing exact match or not
-            if (exactMatch) {
-                // Check if name is an exact match
-                nameMatches = query.equals(item.getName());
-                // Check if description is an exact match
-                descMatches = query.equals(item.getDescription());
-            } else {
-                // Handle case-insensitivity by converting to lowercase
-                String name = item.getName().toLowerCase();
-                String description = item.getDescription().toLowerCase();
-                // Check if name contains query
-                nameMatches = name.contains(query);
-                // Check if description contains query
-                descMatches = description.contains(query);
-            }
-
-            // If either one matches, add to our list
-            if (nameMatches || descMatches) {
-                itemList.add(item);
-            }
-        }
-
-        return itemList;
+        // Use search function from SearchService to return a collection
+        return this.searchService.search(query);
     }
 }

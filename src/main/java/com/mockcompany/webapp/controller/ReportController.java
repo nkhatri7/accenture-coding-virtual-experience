@@ -1,17 +1,15 @@
 package com.mockcompany.webapp.controller;
 
 import com.mockcompany.webapp.api.SearchReportResponse;
+import com.mockcompany.webapp.data.ProductItemRepository;
 import com.mockcompany.webapp.model.ProductItem;
+import com.mockcompany.webapp.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.*;
 
 /**
  * Management decided it is super important that we have lots of products that match the following terms.
@@ -21,16 +19,11 @@ import java.util.regex.Pattern;
 @RestController
 public class ReportController {
 
-    /**
-     * The people that wrote this code didn't know about JPA Spring Repository interfaces!
-     */
-    private final EntityManager entityManager;
+    @Autowired
+    SearchService searchService;
 
     @Autowired
-    public ReportController(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
+    ProductItemRepository productItemRepository;
 
     @GetMapping("/api/products/report")
     public SearchReportResponse runReport() {
@@ -38,50 +31,18 @@ public class ReportController {
         SearchReportResponse response = new SearchReportResponse();
         response.setSearchTermHits(hits);
 
-        int count = this.entityManager.createQuery("SELECT item FROM ProductItem item").getResultList().size();
-
-        List<Number> matchingIds = new ArrayList<>();
-        matchingIds.addAll(
-                this.entityManager.createQuery("SELECT item.id from ProductItem item where item.name like '%cool%'").getResultList()
-        );
-        matchingIds.addAll(
-                this.entityManager.createQuery("SELECT item.id from ProductItem item where item.description like '%cool%'").getResultList()
-        );
-        matchingIds.addAll(
-                this.entityManager.createQuery("SELECT item.id from ProductItem item where item.name like '%Cool%'").getResultList()
-        );
-        matchingIds.addAll(
-                this.entityManager.createQuery("SELECT item.id from ProductItem item where item.description like '%cool%'").getResultList()
-        );
-        List<Number> counted = new ArrayList<>();
-        for (Number id: matchingIds) {
-            if (!counted.contains(id)) {
-                counted.add(id);
-            }
-        }
-
-        response.getSearchTermHits().put("Cool", counted.size());
-
-
+        // Get total number of products
+        int count = (int) this.productItemRepository.count();
         response.setProductCount(count);
 
-        List<ProductItem> allItems = entityManager.createQuery("SELECT item FROM ProductItem item").getResultList();
-        int kidCount = 0;
-        int perfectCount = 0;
-        Pattern kidPattern = Pattern.compile("(.*)[kK][iI][dD][sS](.*)");
-        for (ProductItem item : allItems) {
-            if (kidPattern.matcher(item.getName()).matches() || kidPattern.matcher(item.getDescription()).matches()) {
-                kidCount += 1;
-            }
-            if (item.getName().toLowerCase().contains("perfect") || item.getDescription().toLowerCase().contains("perfect")) {
-                perfectCount += 1;
-            }
+        // Create array of search terms to automate process
+        String[] searchTerms = {"Cool", "Amazing", "Perfect", "Kids"};
+
+        for (String searchTerm: searchTerms) {
+            // Create a list for each term and add it to the response with the size
+            Collection<ProductItem> termList = this.searchService.search(searchTerm);
+            response.getSearchTermHits().put(searchTerm, termList.size());
         }
-        response.getSearchTermHits().put("Kids", kidCount);
-
-        response.getSearchTermHits().put("Amazing", entityManager.createQuery("SELECT item FROM ProductItem item where lower(concat(item.name, ' - ', item.description)) like '%amazing%'").getResultList().size());
-
-        hits.put("Perfect", perfectCount);
 
         return response;
     }
