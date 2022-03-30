@@ -47,7 +47,7 @@ public class ReportController {
         int count = (int) this.productItemRepository.count();
 
         for (String searchTerm: searchTerms) {
-            // Create a list for each term and add it to the response with the size
+            // Create a list for each term and add it to hits with the size
             Collection<ProductItem> termList = this.searchService.search(searchTerm);
             hits.put(searchTerm, termList.size());
         }
